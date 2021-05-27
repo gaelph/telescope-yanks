@@ -11,7 +11,7 @@ This a partial reimplementation of [coc-yank](https://github.com/neoclide/coc-ya
 
 With packer:
 ```lua
-	use {"gaelph/telescope-yanks", rocks = {"md5", "luajson"}}
+use {"gaelph/telescope-yanks", rocks = {"md5", "luajson"}}
 ```
 
 Along with your Telescope Configuration:
@@ -26,7 +26,6 @@ function Telescope.yanks()
 end
 
 vim.api.nvim_set_keymap('n', '<space>y', ':lua Telescope.yanks()<cr>', {silent = true})
-vimp.nmap('<Space>y', ':lua Telescope.yanks()<CR>')
 ```
 
 ## Options
