@@ -4,6 +4,9 @@ A Yank extensions for [Telescope](https://github.com/nvim-telescope/telescope.nv
 
 This a partial reimplementation of [coc-yank](https://github.com/neoclide/coc-yank), but rewrote in lua.
 
+> *Note:* This still a very early release 
+> It has only been tested on my setup: macOS 11.4, neovim 0.5
+
 ## Install
 
 With packer:
