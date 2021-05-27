@@ -28,6 +28,11 @@ end
 vim.api.nvim_set_keymap('n', '<space>y', ':lua Telescope.yanks()<cr>', {silent = true})
 ```
 
+## Features
+
+ * Persist yank list across vim instances.
+ * Fuzzy search your yanks with a syntax highlighted preview.
+
 ## Options
 
 All are optional
