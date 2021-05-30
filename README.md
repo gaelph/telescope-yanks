@@ -35,6 +35,7 @@ vim.api.nvim_set_keymap('n', '<space>y', ':lua Telescope.yanks()<cr>', {silent =
 
  * Persist yank list across vim instances.
  * Fuzzy search your yanks with a syntax highlighted preview.
+ * Pastes the selected yank on enter.
 
 ## Options
 
