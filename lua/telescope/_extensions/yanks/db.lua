@@ -1,7 +1,7 @@
 DATA_PATH = vim.fn.stdpath('data')
 
 local md5 = require('md5')
-local json = require('luajson')
+local json = require('json')
 
 local default_db_dir = DATA_PATH .. "/yanks"
 os.execute("mkdir -p " .. default_db_dir)
