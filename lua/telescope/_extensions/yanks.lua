@@ -32,7 +32,7 @@ end
 -- default displayer
 local displayer = entry_display.create {
     separator = " ",
-    items = {{width = conf.width * vim.o.columns / 2}, {remaining = true}}
+    items = {{width = conf.width * vim.o.columns}, {remaining = true}}
 }
 
 ---Present yank in the search results list
