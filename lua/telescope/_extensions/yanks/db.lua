@@ -64,7 +64,7 @@ end
 
 ---
 ---@class HistoryItem
-local HistoryItem = {id = "", content = {}, regtype = "", path = "", filetype = ""}
+local HistoryItem = {id = "", content = {}, regtype = "", path = "", filetype = "", timeused = ""}
 
 ---
 ---@param params table
@@ -125,8 +125,16 @@ end
 ---@treturn HistoryItem
 function DB:build_item(content, filepath, regtype, filetype)
     local id = string.tohex(md5.sum(content))
+    local timeused = os.time(os.date("!*t"))
 
-    return HistoryItem:new({id = id, content = content, regtype = regtype, filetype = filetype, path = filepath})
+    return HistoryItem:new({
+        id = id,
+        content = content,
+        regtype = regtype,
+        filetype = filetype,
+        path = filepath,
+        timeused = timeused
+    })
 end
 
 ---comment
@@ -144,16 +152,16 @@ function DB:write(rawItems)
         local filepath = parts[1] or "0"
         local lnum = parts[2] or 1
         local col = parts[3] or 0
+        local regtype = item.regtype or "V"
+        local filetype = item.filetype or "text"
+        local timeused = item.timeused or os.time(os.date("!*t"))
 
-        local line = item.id .. "|" .. filepath .. "|" .. lnum .. "|" .. col .. "|" .. item.regtype .. "|" ..
-                         item.filetype
+        local line =
+            item.id .. "|" .. filepath .. "|" .. lnum .. "|" .. col .. "|" .. regtype .. "|" .. filetype .. "|" ..
+                timeused
 
         table.insert(lines, line)
-
         table.insert(lines, item.content)
-        -- for _, s in ipairs(item.content) do
-        -- 	table.insert(lines, "\t$" .. s)
-        -- end
     end
 
     local fileContents = table.concat(lines, "\n") .. "\n"
@@ -186,7 +194,16 @@ function DB:load()
             local ln = parts[3] or 1
             local c = parts[4] or 0
             local path = p .. "\t" .. ln .. "\t" .. c
-            item = {id = parts[1], path = path, regtype = parts[5], filetype = parts[6], content = {}}
+            local timeused = parts[7] or os.time(os.date("!*t"))
+
+            item = {
+                id = parts[1],
+                path = path,
+                regtype = parts[5],
+                filetype = parts[6],
+                timeused = timeused,
+                content = {}
+            }
         end
     end
 
@@ -230,6 +247,18 @@ function DB:delete(id)
     for _, item in ipairs(items) do if item.id ~= id then table.insert(filtered, item) end end
 
     self:write(items)
+end
+
+function DB:update_timeused(id)
+    local items = self:load()
+    local updated = {}
+
+    for _, item in ipairs(items) do
+        if item.id == id then item.timeused = os.time(os.date("!*t")) end
+        table.insert(updated, item)
+    end
+
+    self:write(updated)
 end
 
 function DB:_convert_json(json_file)

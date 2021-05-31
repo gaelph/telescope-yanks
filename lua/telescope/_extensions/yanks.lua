@@ -3,9 +3,9 @@ if not has_telescope then error('This plugins requires nvim-telescope/telescope.
 local a = require('plenary.async_lib')
 local async = a.async
 
-local DB = require("telescope._extensions.yanks.db")
+-- local DB = require("telescope._extensions.yanks.db")
 local u = require("telescope._extensions.yanks.utils")
-local setup = require("telescope._extensions.yanks.setup").setup
+local Yanks = require("telescope._extensions.yanks.setup")
 
 local actions = require 'telescope.actions'
 local action_state = require 'telescope.actions.state'
@@ -15,13 +15,16 @@ local previewers = require 'telescope.previewers'
 local conf = require('telescope.config').values
 local entry_display = require('telescope.pickers.entry_display')
 
-local db = DB:new()
+-- local db = DB:new()
 
 ---Fetches yanks from file
 ---@treturn Array(HistoryItem)
 local function yank_finder()
-    local items = db:load()
-    u.reverse(items)
+    local items = Yanks.db:load()
+
+    table.sort(items, function(one, other)
+        return one.timeused > other.timeused
+    end)
 
     return items
 end
@@ -60,7 +63,8 @@ local function yank_entry_maker(yank)
         ordinal = name,
         regtype = yank.regtype,
         filetype = yank.filetype,
-        preview_command = preview_entry
+        preview_command = preview_entry,
+        id = yank.id
     }
 end
 
@@ -97,6 +101,8 @@ local function yanks(opts)
                 -- paste
                 vim.api
                     .nvim_put(selection.value, type, true --[[ after the cursor ]] , true --[[end with cusor after the texc]] )
+
+                Yanks.db:update_timeused(selection.id)
             end)
 
             return true
@@ -104,4 +110,4 @@ local function yanks(opts)
     }):find()
 end
 
-return telescope.register_extension {exports = {yanks = yanks, setup = setup}}
+return telescope.register_extension {exports = {yanks = yanks, setup = Yanks.setup}}

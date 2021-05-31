@@ -1,7 +1,7 @@
 local DB = require("telescope._extensions.yanks.db")
 local u = require("telescope._extensions.yanks.utils")
 
-local M = {}
+local M = {db = nil}
 
 ---Setup function for telescope-yanks plugin
 -- @table options
@@ -11,7 +11,7 @@ local M = {}
 --  - maxsize: maximum number of yanks to store
 --             defaults do 200
 function M.setup(options)
-    local db = DB:new(options)
+    M.db = DB:new(options)
 
     _G.__pasteme_handle = function(event, uri)
         local winnr = vim.api.nvim_get_current_win()
@@ -29,7 +29,7 @@ function M.setup(options)
 
         if string.len(content) > 4 then
             local path = uri .. "\t" .. line .. "\t" .. col
-            db:add(content, regtype, path, filetype)
+            M.db:add(content, regtype, path, filetype)
         end
     end
 
