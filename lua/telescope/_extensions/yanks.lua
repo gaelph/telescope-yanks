@@ -23,7 +23,13 @@ local function yank_finder()
     local items = Yanks.db:load()
 
     table.sort(items, function(one, other)
-        return one.timeused > other.timeused
+        local otu = other.timeused
+        local stu = one.timeused
+
+        if type(otu) == "string" then otu = tonumber(otu, 10) end
+        if type(stu) == "string" then stu = tonumber(stu, 10) end
+
+        return stu > otu
     end)
 
     return items
@@ -32,7 +38,7 @@ end
 -- default displayer
 local displayer = entry_display.create {
     separator = " ",
-    items = {{width = conf.width * vim.o.columns}, {remaining = true}}
+    items = {{width = conf.layout_config.width * vim.o.columns}, {remaining = true}}
 }
 
 ---Present yank in the search results list
