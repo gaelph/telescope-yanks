@@ -83,7 +83,7 @@ local function yanks(opts)
         results_title = "Yanks",
         preview_title = "Preview",
 
-        finder = finders.new_dynamic({fn = async(yank_finder), entry_maker = yank_entry_maker}),
+        finder = finders.new_dynamic({fn = yank_finder, entry_maker = yank_entry_maker}),
 
         sorter = conf.generic_sorter(opts),
         sorting_strategy = "descending",
