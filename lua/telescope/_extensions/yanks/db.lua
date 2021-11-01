@@ -34,11 +34,24 @@ end
 -- @string sep
 -- @treturn tbl
 local function split(str, sep)
-    local t = {}
+    local arr = {}
+    local sub = ""
+    for i = 1, #str do
+        local c = str:sub(i, i)
+        if c ~= sep then
+            sub = sub .. c
+        else
+            table.insert(arr, sub)
+            sub = ""
+        end
+    end
 
-    for token in string.gmatch(str, "[^%" .. sep .. "]+") do table.insert(t, token) end
+    if sub ~= "" then
+        table.insert(arr, sub)
+        sub = ""
+    end
 
-    return t
+    return arr
 end
 
 --- Tells if a table contains an element (`needle`)
@@ -49,7 +62,9 @@ end
 -- @table needle
 -- @treturn boolean
 local function contains(tbl, needle)
-    for _, item in ipairs(tbl) do if item.id == needle.id then return true end end
+    for _, item in ipairs(tbl) do
+        if item.id == needle.id then return true end
+    end
 
     return false
 end
@@ -64,7 +79,14 @@ end
 
 ---
 ---@class HistoryItem
-local HistoryItem = {id = "", content = {}, regtype = "", path = "", filetype = "", timeused = ""}
+local HistoryItem = {
+    id = "",
+    content = {},
+    regtype = "",
+    path = "",
+    filetype = "",
+    timeused = ""
+}
 
 ---
 ---@param params table
@@ -145,7 +167,9 @@ function DB:write(rawItems)
 
     local itemCount = count(items)
 
-    if itemCount > self.maxsize then items = slice(items, itemCount - self.maxsize); end
+    if itemCount > self.maxsize then
+        items = slice(items, itemCount - self.maxsize);
+    end
 
     for _, item in ipairs(items) do
         local parts = split(item.path, '\t')
@@ -156,9 +180,8 @@ function DB:write(rawItems)
         local filetype = item.filetype or "text"
         local timeused = item.timeused or os.time(os.date("!*t"))
 
-        local line =
-            item.id .. "|" .. filepath .. "|" .. lnum .. "|" .. col .. "|" .. regtype .. "|" .. filetype .. "|" ..
-                timeused
+        local line = item.id .. "|" .. filepath .. "|" .. lnum .. "|" .. col ..
+                         "|" .. regtype .. "|" .. filetype .. "|" .. timeused
 
         table.insert(lines, line)
         table.insert(lines, item.content)
@@ -185,7 +208,9 @@ function DB:load()
         else
             if item ~= nil then
                 item.content = table.concat(lines, '\n')
-                if string.len(item.content) > 4 then table.insert(items, HistoryItem:new(item)) end
+                if string.len(item.content) > 4 then
+                    table.insert(items, HistoryItem:new(item))
+                end
                 lines = {}
                 item = nil
             end
@@ -223,7 +248,9 @@ local function tab_it(content)
 
     local tabbed_content = table.concat(tabbed, '\n')
 
-    if not starts_with(tabbed_content, "\t") then tabbed_content = "\t" .. tabbed_content end
+    if not starts_with(tabbed_content, "\t") then
+        tabbed_content = "\t" .. tabbed_content
+    end
 
     return tabbed_content
 end
@@ -244,7 +271,9 @@ function DB:delete(id)
     local items = self:load()
     local filtered = {}
 
-    for _, item in ipairs(items) do if item.id ~= id then table.insert(filtered, item) end end
+    for _, item in ipairs(items) do
+        if item.id ~= id then table.insert(filtered, item) end
+    end
 
     self:write(items)
 end
