@@ -1,7 +1,7 @@
 local has_telescope, telescope = pcall(require, 'telescope')
-if not has_telescope then error('This plugins requires nvim-telescope/telescope.nvim') end
-local a = require('plenary.async_lib')
-local async = a.async
+if not has_telescope then
+    error('This plugins requires nvim-telescope/telescope.nvim')
+end
 
 -- local DB = require("telescope._extensions.yanks.db")
 local u = require("telescope._extensions.yanks.utils")
@@ -38,7 +38,10 @@ end
 -- default displayer
 local displayer = entry_display.create {
     separator = " ",
-    items = {{width = conf.layout_config.horizontal.width * vim.o.columns}, {remaining = true}}
+    items = {
+        {width = conf.layout_config.horizontal.width * vim.o.columns},
+        {remaining = true}
+    }
 }
 
 ---Present yank in the search results list
@@ -83,7 +86,10 @@ local function yanks(opts)
         results_title = "Yanks",
         preview_title = "Preview",
 
-        finder = finders.new_dynamic({fn = yank_finder, entry_maker = yank_entry_maker}),
+        finder = finders.new_dynamic({
+            fn = yank_finder,
+            entry_maker = yank_entry_maker
+        }),
 
         sorter = conf.generic_sorter(opts),
         sorting_strategy = "descending",
@@ -91,29 +97,38 @@ local function yanks(opts)
         previewer = previewers.display_content.new(opts),
 
         attach_mappings = function()
-            actions.select_default:replace(function(prompt_bufnr)
-                local selection = action_state.get_selected_entry()
-                actions.close(prompt_bufnr)
+            actions.select_default:replace(
+                function(prompt_bufnr)
+                    local selection = action_state.get_selected_entry()
+                    actions.close(prompt_bufnr)
 
-                -- Infer how to paste from how it was yanked
-                -- "v" -> "c" : character-wise
-                -- "V" -> "l" : line-wise
-                local type = "c"
-                if selection.regtype == "V" then type = "l" end
+                    -- Infer how to paste from how it was yanked
+                    -- "v" -> "c" : character-wise
+                    -- "V" -> "l" : line-wise
+                    local type = "c"
+                    if selection.regtype == "V" then
+                        type = "l"
+                    end
 
-                -- ensure we are on the same buffer
-                -- than when we opened Telescope yank
-                vim.api.nvim_set_current_buf(buf)
-                -- paste
-                vim.api
-                    .nvim_put(selection.value, type, true --[[ after the cursor ]] , true --[[end with cusor after the texc]] )
+                    -- ensure we are on the same buffer
+                    -- than when we opened Telescope yank
+                    vim.api.nvim_set_current_buf(buf)
+                    -- paste
+                    vim.api
+                        .nvim_put(selection.value, type, true --[[ after the cursor ]] ,
+                                  true --[[end with cusor after the texc]] )
 
-                Yanks.db:update_timeused(selection.id)
-            end)
+                    Yanks.db:update_timeused(selection.id)
+                end)
 
             return true
         end
     }):find()
 end
 
-return telescope.register_extension {exports = {yanks = yanks, setup = Yanks.setup}}
+
+return telescope.register_extension {
+
+    exports = {yanks = yanks, setup = Yanks.setup}
+
+}
