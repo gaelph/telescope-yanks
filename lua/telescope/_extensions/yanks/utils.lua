@@ -1,8 +1,12 @@
+--- @classmod Utils
+--- @class Utils
 local Utils = {}
 local api = vim.api
 
----Reverses a list in place
----@table t
+--- Reverses a list in place
+--- @generic T
+--- @param t T[]
+--- @return T[]
 function Utils.reverse(t)
     local n = #t
     local i = 1
@@ -13,45 +17,86 @@ function Utils.reverse(t)
     end
 end
 
----Split a string using a separator
----@string string
----@string sep
----@treturn Array(string)
-function Utils.split(string, sep)
-    local t = {}
+--- Split a string using a separator
+--- @param str string
+--- @param sep string
+--- @return string[]
+function Utils.split(str, sep)
+    local arr = {}
+    local sub = ""
+    for i = 1, #str do
+        local c = str:sub(i, i)
+        if c ~= sep then
+            sub = sub .. c
+        else
+            table.insert(arr, sub)
+            sub = ""
+        end
+    end
 
-    for token in string.gmatch(string, "[^%" .. sep .. "]+") do table.insert(t, token) end
+    if sub ~= "" then
+        table.insert(arr, sub)
+        sub = ""
+    end
 
-    return t
+    return arr
 end
 
----Counts how many items in a table
----@table table
----@treturn number
-function Utils.count(tbl)
-    local c = 0
+--- Slices a table in two, returns the part after `start`
+--- @generic N
+--- @param t N[]
+--- @param start number
+--- @return N[]
+function Utils.slice(t, start)
+    local r = {}
 
-    for _, _ in ipairs(tbl) do c = c + 1 end
+    for i, item in ipairs(t) do if i > start then table.insert(r, item) end end
 
-    return c
+    return r
 end
 
----Splits a yank content and removes the tab padding
----@string content
----@treturn Array(string)
+--- Tells if a table contains an element (`needle`)
+--- As this is not a by reference thing, elements in `tbl` and `needle`
+--- should have a unique `id` property
+--- to identify them.
+--- @generic T
+--- @param tbl T[]
+--- @param needle T
+--- @param comp fun(a: T, b: T): boolean
+--- @return boolean
+function Utils.contains(tbl, needle, comp)
+    for _, item in ipairs(tbl) do if comp(item, needle) then return true end end
+
+    return false
+end
+
+--- Return `true` if `str` starts with `start`
+--- @param str string
+--- @param start string
+--- @return boolean value
+function Utils.starts_with(str, start)
+    return str:sub(1, #start) == start
+end
+
+--- Splits a yank content and removes the tab padding
+--- @param content string[]
+--- @return string[]
 function Utils.read_lines(content)
     local lines = {}
     Utils.split(content, "\n")
-    for _, line in ipairs(Utils.split(content, "\n")) do table.insert(lines, string.sub(line, 2)) end
+    for _, line in ipairs(Utils.split(content, "\n")) do
+        table.insert(lines, string.sub(line, 2))
+    end
     return lines
 end
 
----Gets the first of an array of strings
----@table value
----@treturn string
+--- Gets the first of an array of strings
+--- @param value string[]
+--- @return string
+--- @raise table is empty
 function Utils.first(value)
     local candidate
-    if Utils.count(value) > 0 then
+    if #value > 0 then
         local c = 0
         candidate = value[c]
 
@@ -63,11 +108,11 @@ function Utils.first(value)
         end
     end
 
-    return "ERROR"
+    error("table is empty")
 end
 
----Creates augroups
--- @table definitions
+--- Creates augroups
+--- @param definitions table<string, string[][]>
 function Utils.nvim_create_augroups(definitions)
     for group_name, definition in pairs(definitions) do
         api.nvim_command('augroup ' .. group_name)
@@ -80,4 +125,5 @@ function Utils.nvim_create_augroups(definitions)
     end
 end
 
-return Utils
+--- @exports
+return Utils --- @type Utils

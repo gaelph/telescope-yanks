@@ -1,17 +1,19 @@
-local DB = require("telescope._extensions.yanks.db")
-local u = require("telescope._extensions.yanks.utils")
+--- @module Yanks
+--- Telescope Extension
+local DB = require("telescope._extensions.yanks.db") --- @type DB
+local u = require("telescope._extensions.yanks.utils") --- @type Utils
 
-local M = {db = nil}
+local M = {}
 
----Setup function for telescope-yanks plugin
--- @table options
--- Options :
---  - db_dir: path to a directory to store the yanks (must exist)
---            defaults to `~/.local/nvim/yanks`
---  - maxsize: maximum number of yanks to store
---             defaults do 200
+--- Setup function for telescope-yanks plugin
+--- @param options DBOptions
+--- Options :
+---  - db_dir: path to an existing directory to store the yanks
+---            defaults to `~/.local/nvim/yanks`
+---  - maxsize: maximum number of yanks to store
+---             defaults do 200
 function M.setup(options)
-    M.db = DB:new(options)
+    M.db = DB:new(options) --- @type DB
 
     _G.__pasteme_handle = function(event, uri)
         local winnr = vim.api.nvim_get_current_win()
@@ -34,8 +36,17 @@ function M.setup(options)
     end
 
     u.nvim_create_augroups({
-        PasteMe = {{'TextYankPost', '*', 'call luaeval("__pasteme_handle(_A[1], _A[2])", [v:event, +expand(\'%:p\')])'}}
+        PasteMe = {
+            {
+                'TextYankPost', '*',
+                'call luaeval("__pasteme_handle(_A[1], _A[2])", [v:event, +expand(\'%:p\')])'
+            }
+        }
     })
 end
 
-return M
+--- @class YanksExtension
+--- @field db DB
+--- @field setup function
+
+return M -- @type YanksExtension
